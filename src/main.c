@@ -1,5 +1,8 @@
 #include "dbg.h"
 #include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 
 void test_debug(){
@@ -17,17 +20,31 @@ void test_info_err_warn(){
 
 int main(int argc, char* argv[])
 {	
+	char *hvalue = NULL;
+	int index;
+	int option;
+	opterr = 0;
 	test_debug();
-	
 	test_info_err_warn();
+	while ((option = getopt (argc, argv, "h:")) != -1)
+		switch (option)
+			{
+			case 'h':
+				hvalue = optarg;
+			break;
+			case '?':
+				if (optopt == 'h')
+					fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+				else if (isprint (optopt))
+					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+				else
+					fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
+				return 1;
+			default:
+			abort ();
+			}
+	printf (" hvalue = %s\n", hvalue);
+	for (index = optind; index < argc; index++)printf ("Non-option argument %s\n", argv[index]);
 
-	if(argc < 2){
-		printf("You need to put an argument.\n");	
-	}else{
-		if( *argv[2] == 'h')
-		{
-			printf("Help message");
-		}
-	}
 	return 0;
 }
